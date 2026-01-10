@@ -1,0 +1,20 @@
+[project]
+name = "wrappers"
+version = "0.1.0"
+description = "Python wrappers for Hyprland system utilities"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = ["rich>=14.0.0"]
+
+[project.scripts]
+wrp = "wrappers.cli:main"
+
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+python-source = "src"
+manifest-path = "rust/Cargo.toml"
+module-name = "wrappers.wrp_native"
