@@ -1,4 +1,4 @@
-"""CLI entry point for wrappers."""
+"""CLI entry point for pywrap."""
 
 import argparse
 import importlib
@@ -15,7 +15,7 @@ def _discover_commands() -> dict[str, dict]:
     for module_info in pkgutil.iter_modules(commands.__path__):
         if module_info.name.startswith("_"):
             continue
-        module = importlib.import_module(f"wrappers.commands.{module_info.name}")
+        module = importlib.import_module(f"pywrap.commands.{module_info.name}")
         if hasattr(module, "COMMAND"):
             discovered[module_info.name] = module.COMMAND
     return discovered
@@ -74,7 +74,7 @@ def main() -> int:
         parser.print_help()
         return 0
 
-    module = importlib.import_module(f"wrappers.commands.{args.command}")
+    module = importlib.import_module(f"pywrap.commands.{args.command}")
     return module.run(*args.args)
 
 

@@ -1,1 +1,1 @@
-"""Tests for wrappers package."""
+"""Tests for pywrap package."""

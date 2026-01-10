@@ -1,4 +1,4 @@
-"""Tests for wrappers.core.hyprland module."""
+"""Tests for pywrap.core.hyprland module."""
 
 import unittest
 
