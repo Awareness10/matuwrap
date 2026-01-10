@@ -55,10 +55,10 @@ Native Rust module (`wrp_native`) provides significant speedups:
 
 ## Adding Commands
 
-Create a file in `src/wrappers/commands/`:
+Create a file in `src/pywrap/commands/`:
 
 ```python
-# src/wrappers/commands/mycommand.py
+# src/pywrap/commands/mycommand.py
 """Short description."""
 
 COMMAND = {
@@ -79,7 +79,7 @@ Auto-discovered. Available immediately as `wrp mycommand`.
 
 ## Theme Helpers
 
-Import from `wrappers.core.theme`:
+Import from `pywrap.core.theme`:
 
 | Function | Purpose |
 |----------|---------|
