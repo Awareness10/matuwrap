@@ -5,8 +5,8 @@ import importlib
 import pkgutil
 import sys
 
-from wrappers import commands
-from wrappers.core.theme import console, print_error
+from pywrap import commands
+from pywrap.core.theme import console, print_error
 
 
 def _discover_commands() -> dict[str, dict]:

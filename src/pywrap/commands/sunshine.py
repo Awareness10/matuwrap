@@ -2,10 +2,10 @@
 
 from pathlib import Path
 
-from wrappers.core import hyprland, systemd
-from wrappers.core.hyprland import TRANSFORMS, swap_if_rotated
-from wrappers.core.notify import notify
-from wrappers.core.theme import (
+from pywrap.core import hyprland, systemd
+from pywrap.core.hyprland import TRANSFORMS, swap_if_rotated
+from pywrap.core.notify import notify
+from pywrap.core.theme import (
     console,
     print_header,
     print_kv,

@@ -2,7 +2,7 @@
 
 import unittest
 
-from wrappers.core.hyprland import TRANSFORMS, is_rotated, swap_if_rotated
+from pywrap.core.hyprland import TRANSFORMS, is_rotated, swap_if_rotated
 
 
 class TestTransforms(unittest.TestCase):

@@ -1,4 +1,4 @@
-# wrp
+# pyWrap
 
 Hyprland system utilities with matugen-themed output and native Rust acceleration.
 
@@ -93,7 +93,7 @@ Import from `wrappers.core.theme`:
 ## Architecture
 
 ```
-src/wrappers/
+src/pywrap/
 ├── cli.py              # Entry point, command discovery
 ├── commands/           # Auto-discovered command modules
 │   ├── audio.py        # PipeWire sink management

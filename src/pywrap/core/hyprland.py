@@ -1,11 +1,9 @@
 """Hyprland IPC wrapper using native socket communication."""
 
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 import json
 import subprocess
 import logging
-
-from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +12,7 @@ _native_hyprctl_json: Optional[Callable[[str], str]] = None
 _USE_NATIVE = False
 
 try:
-    from wrappers.wrp_native import hyprctl as _native_hyprctl, hyprctl_json as _native_hyprctl_json
+    from pywrap.wrp_native import hyprctl as _native_hyprctl, hyprctl_json as _native_hyprctl_json
     _USE_NATIVE = True
 except ImportError:
     logger.warning("Native module unavailable, using subprocess fallback (slower)")

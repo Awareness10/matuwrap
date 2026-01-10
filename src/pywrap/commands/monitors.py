@@ -1,8 +1,8 @@
 """Monitor information command."""
 
-from wrappers.core import hyprland
-from wrappers.core.hyprland import TRANSFORMS, swap_if_rotated
-from wrappers.core.theme import console, print_header, print_kv, print_error, fmt
+from pywrap.core import hyprland
+from pywrap.core.hyprland import TRANSFORMS, swap_if_rotated
+from pywrap.core.theme import console, print_header, print_kv, print_error, fmt
 
 COMMAND = {
     "description": "Show monitor information",

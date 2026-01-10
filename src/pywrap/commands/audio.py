@@ -5,12 +5,12 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING
 
-from wrappers.core.notify import notify
-from wrappers.core.theme import console, print_header, print_success, print_error, fmt
+from pywrap.core.notify import notify
+from pywrap.core.theme import console, print_header, print_success, print_error, fmt
 
 # Try native implementation
 try:
-    from wrappers.wrp_native import get_audio_sinks, set_default_sink, AudioSink
+    from pywrap.wrp_native import get_audio_sinks, set_default_sink, AudioSink
     _USE_NATIVE = True
 except ImportError:
     _USE_NATIVE = False
@@ -18,7 +18,7 @@ except ImportError:
     set_default_sink = None  # type: ignore[assignment]
 
 if TYPE_CHECKING:
-    from wrappers.wrp_native import AudioSink
+    from pywrap.wrp_native import AudioSink
 
 COMMAND = {
     "description": "Toggle audio between HDMI/Headset",

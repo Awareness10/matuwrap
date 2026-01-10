@@ -54,7 +54,7 @@ def main():
     print("Matugen Color Loading:")
     print("-" * 90)
 
-    from wrappers.wrp_native import invalidate_color_cache, get_cached_colors
+    from pywrap.wrp_native import invalidate_color_cache, get_cached_colors
     from pathlib import Path
 
     wallpaper = str(Path.home() / ".current.wall")
@@ -90,7 +90,7 @@ def main():
     print("\nPipeWire Audio Sinks:")
     print("-" * 90)
 
-    from wrappers.wrp_native import get_audio_sinks
+    from pywrap.wrp_native import get_audio_sinks
 
     def native_sinks():
         return get_audio_sinks()
@@ -112,7 +112,7 @@ def main():
         print("-" * 90)
 
         import json
-        from wrappers.wrp_native import hyprctl_json
+        from pywrap.wrp_native import hyprctl_json
 
         def native_monitors():
             return json.loads(hyprctl_json("monitors"))

@@ -1,13 +1,17 @@
 """Dynamic color generation using matugen with native caching."""
 
+from typing import Any, Callable, Optional
 from dataclasses import dataclass
 from pathlib import Path
 
 WALLPAPER_PATH = Path.home() / ".current.wall"
 
+_native_get_colors: Optional[Callable[[str], str]] = None
+_USE_NATIVE = False
+
 # Try native implementation
 try:
-    from wrappers.wrp_native import get_cached_colors as _native_get_colors
+    from pywrap.wrp_native import get_cached_colors as _native_get_colors # type: ignore
     _USE_NATIVE = True
 except ImportError:
     _USE_NATIVE = False
@@ -87,9 +91,10 @@ def get_colors(wallpaper: Path | None = None) -> Colors:
         return Colors.default()
 
     if _USE_NATIVE:
+        assert _native_get_colors is not None
         colors = _native_get_colors(str(path))
         if colors is not None:
-            return Colors.from_dict(colors)
+            return Colors.from_dict(colors) # type: ignore
         return Colors.default()
 
     # Fallback: no native, no matugen subprocess (removed for performance)
