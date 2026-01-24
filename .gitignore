@@ -5,9 +5,12 @@ build/
 dist/
 wheels/
 *.egg-info
+*.pyd
+*.so
 
-# Virtual environments
+# Environments
 .venv
+.env
 
 # Rust
 rust/target/

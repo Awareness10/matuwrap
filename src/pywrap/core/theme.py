@@ -123,3 +123,12 @@ def print_panel(content: str, title: str | None = None) -> None:
             padding=(0, 1),
         )
     )
+
+
+def fix_emoji_width(text: str) -> str:
+    """Fix emoji width for table alignment.
+
+    Strips variation selector-16 (U+FE0F) which causes width miscalculation
+    in some terminals. Emoji will render as text style instead of color.
+    """
+    return text.replace("\uFE0F", "")
