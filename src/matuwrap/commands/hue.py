@@ -24,7 +24,7 @@ from matuwrap.core.theme import (
 load_dotenv()
 HUE_BRIDGE_IP = os.environ.get("HUE_BRIDGE_IP")
 HUE_USERNAME = os.environ.get("HUE_USERNAME")
-HUE_LOGO = Path(__file__).resolve().parents[3] / 'assets' / 'img' / 'hue_logo_.png'
+HUE_LOGO = Path(__file__).resolve().parents[1] / 'assets' / 'img' / 'hue_logo_.png'
 
 COMMAND = {
     "description": "Control Philips Hue lights",
@@ -151,10 +151,13 @@ def _turn_off(hue: HueController, light_id: int) -> int:
 
 def _set_brightness(hue: HueController, light_id: int, value: int) -> int:
     """Set light brightness."""
-    if not 0 <= value <= 254:
-        print_error(f"Brightness must be 0-254, got {fmt(value)}")
+    if not 0 <= value <= 100:
+        print_error(f"Brightness must be 0-100 (%), got {fmt(value)}")
         return 1
+
     try:
+        pct = value
+        value = int(value / 100 * 254)
         hue.set_brightness(light_id, value)
         pct = round(value / 254 * 100)
         print_success(f"Light {fmt(light_id)} brightness set to {fmt(pct)}%")
@@ -315,7 +318,7 @@ def run(*args: str) -> int:
 
     elif cmd == "brightness":
         if len(args) < 3:
-            print_error("Usage: wrp hue brightness <id> <0-254>")
+            print_error("Usage: wrp hue brightness <id> <percent>")
             return 1
         light_id = _parse_int(args[1], "light ID")
         value = _parse_int(args[2], "brightness")

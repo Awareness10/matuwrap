@@ -93,7 +93,7 @@ def print_warning(text: str) -> None:
 
 def print_info(text: str) -> None:
     """Print an info message."""
-    console.print(f"[info]→[/info] {text}")
+    console.print(f"[info]∟[/info] {text}")
 
 
 def create_table(*columns: str, title: str | None = None) -> Table:

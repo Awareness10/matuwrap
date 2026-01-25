@@ -20,5 +20,5 @@ dev:
 	uv run maturin develop --release
 
 clean:
-	rm -rf build/ dist/ *.egg-info htmlcov/ .coverage coverage.xml
+	rm -rf build/ rust/target/ dist/ *.egg-info htmlcov/ .coverage coverage.xml
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
