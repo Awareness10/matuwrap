@@ -2,6 +2,9 @@
 
 Hyprland system utilities with matugen-themed output and native Rust acceleration.
 
+![Image 1](assets/img/wrp1.png)
+![Image 2](assets/img/monitors1.png)
+
 ## Install
 
 Requires Rust toolchain and [maturin](https://github.com/PyO3/maturin).
