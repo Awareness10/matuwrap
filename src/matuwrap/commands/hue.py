@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import requests
 from pathlib import Path
-from typing import Any, Callable, TypeVar
+from typing import Any
 from dotenv import load_dotenv
 
 from matuwrap.core.colors import get_colors
@@ -25,21 +25,6 @@ load_dotenv()
 HUE_BRIDGE_IP = os.environ.get("HUE_BRIDGE_IP")
 HUE_USERNAME = os.environ.get("HUE_USERNAME")
 HUE_LOGO = Path(__file__).resolve().parents[3] / 'assets' / 'img' / 'hue_logo_.png'
-
-T = TypeVar("T")
-
-
-def _hue_request(action: str, func: Callable[[], T]) -> tuple[T | None, int]:
-    """Execute Hue request with error handling.
-
-    Returns (result, return_code) where return_code is 0 on success, 1 on failure.
-    """
-    try:
-        return func(), 0
-    except requests.exceptions.RequestException as e:
-        print_error(f"Failed to {action}: {e}")
-        return None, 1
-
 
 COMMAND = {
     "description": "Control Philips Hue lights",

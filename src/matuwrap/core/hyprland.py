@@ -1,14 +1,15 @@
 """Hyprland IPC wrapper using native socket communication."""
 
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 import json
 import subprocess
 import logging
 
 logger = logging.getLogger(__name__)
 
-_native_hyprctl: Optional[Callable[[str], str]] = None
-_native_hyprctl_json: Optional[Callable[[str], str]] = None
+_native_hyprctl: Callable[[str], str] | None = None
+_native_hyprctl_json: Callable[[str], str] | None = None
 _USE_NATIVE = False
 
 try:

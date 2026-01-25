@@ -1,12 +1,12 @@
 """Dynamic color generation using matugen with native caching."""
 
-from typing import Any, Callable, Optional
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
 WALLPAPER_PATH = Path.home() / ".current.wall"
 
-_native_get_colors: Optional[Callable[[str], str]] = None
+_native_get_colors: Callable[[str], dict[str, str]] | None = None
 _USE_NATIVE = False
 
 # Try native implementation

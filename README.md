@@ -26,6 +26,18 @@ uv run maturin develop --release   # Build + install to local .venv
 uv run wrp monitors                # Run from .venv
 ```
 
+Alternative: Makefile
+
+| Command              | Description                             |
+| -------------------- | --------------------------------------- |
+| `make test`          | Run tests with verbose output           |
+| `make coverage`      | Run tests + terminal coverage report    |
+| `make coverage-html` | Run tests + open html-report in Browser |
+| `make build`         | Release build (maturin)                 |
+| `make dev`           | Dev build (maturin)                     |
+| `make clean`         | Remove build artifacts                  |
+
+
 ## Usage
 
 ```bash
@@ -93,17 +105,25 @@ Import from `matuwrap.core.theme`:
 ## Architecture
 
 ```
-src/matuwrap/
-├── cli.py              # Entry point, command discovery
-├── commands/           # Auto-discovered command modules
-│   ├── audio.py        # PipeWire sink management
-│   ├── monitors.py     # Hyprland monitor info
-│   └── sunshine.py     # Sunshine streaming control
-└── core/
-    ├── colors.py       # Matugen color extraction (cached)
-    ├── hyprland.py     # Hyprland IPC (native socket)
-    ├── theme.py        # Rich console theming
-    └── ...
+src/matuwrap
+├── commands
+│   ├── audio.py
+│   ├── hue.py
+│   ├── __init__.py
+│   ├── monitors.py
+│   └── sunshine.py
+├── core
+│   ├── colors.py
+│   ├── hyprland.py
+│   ├── __init__.py
+│   ├── notify.py
+│   ├── systemd.py
+│   └── theme.py
+├── cli.py
+├── __init__.py
+├── py.typed
+├── wrp_native.cpython-312-x86_64-linux-gnu.so
+└── wrp_native.pyi
 
 rust/
 ├── Cargo.toml

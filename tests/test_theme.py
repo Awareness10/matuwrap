@@ -229,8 +229,7 @@ class TestPrintFunctions(unittest.TestCase):
     def _capture_output(self, func, *args, **kwargs):
         """Helper to capture console output."""
         buffer = StringIO()
-        console = Console(file=buffer, theme=THEME, force_terminal=True)
-        # Temporarily replace console's file
+        # Patch the module's console file to capture output
         original_file = console.file
         console._file = buffer
         try:

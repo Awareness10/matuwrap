@@ -23,7 +23,7 @@ def _discover_commands() -> dict[str, dict]:
 
 def _print_help(cmds: dict[str, dict]) -> None:
     """Print modern styled help."""
-    console.print("[title]wrp[/title] [muted]─[/muted] Hyprland system utilities\n")
+    console.print("[title]matuwrap[/title] [muted]─[/muted] Styled CLI with matugen, with PyO3 (maturin) wrapping\n")
     console.print("[label]Usage:[/label]  wrp [value]<command>[/value] [muted][args][/muted]\n")
     console.print("[label]Commands:[/label]")
 
