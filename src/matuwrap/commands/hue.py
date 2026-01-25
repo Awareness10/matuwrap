@@ -5,11 +5,12 @@ from __future__ import annotations
 import os
 import requests
 from pathlib import Path
+from typing import Any, Callable, TypeVar
 from dotenv import load_dotenv
 
-from pywrap.core.colors import get_colors
-from pywrap.core.notify import notify
-from pywrap.core.theme import (
+from matuwrap.core.colors import get_colors
+from matuwrap.core.notify import notify
+from matuwrap.core.theme import (
     console,
     print_header,
     print_success,
@@ -24,6 +25,22 @@ load_dotenv()
 HUE_BRIDGE_IP = os.environ.get("HUE_BRIDGE_IP")
 HUE_USERNAME = os.environ.get("HUE_USERNAME")
 HUE_LOGO = Path(__file__).resolve().parents[3] / 'assets' / 'img' / 'hue_logo_.png'
+
+T = TypeVar("T")
+
+
+def _hue_request(action: str, func: Callable[[], T]) -> tuple[T | None, int]:
+    """Execute Hue request with error handling.
+
+    Returns (result, return_code) where return_code is 0 on success, 1 on failure.
+    """
+    try:
+        return func(), 0
+    except requests.exceptions.RequestException as e:
+        print_error(f"Failed to {action}: {e}")
+        return None, 1
+
+
 COMMAND = {
     "description": "Control Philips Hue lights",
     "args": "<subcommand> [args]",
@@ -48,34 +65,34 @@ class HueController:
         self.username = username
         self.base_url = f"http://{bridge_ip}/api/{username}"
 
-    def get_lights(self) -> dict:
+    def get_lights(self) -> dict[str, Any]:
         """Get all lights."""
         resp = requests.get(f"{self.base_url}/lights", timeout=10)
         resp.raise_for_status()
         return resp.json()
 
-    def set_light_state(self, light_id: int, **kwargs) -> list:
+    def set_light_state(self, light_id: int, **kwargs: Any) -> list[dict[str, Any]]:
         """Set light state (on, bri, hue, sat, ct, etc.)."""
         url = f"{self.base_url}/lights/{light_id}/state"
         resp = requests.put(url, json=kwargs, timeout=10)
         resp.raise_for_status()
         return resp.json()
 
-    def turn_on(self, light_id: int) -> list:
+    def turn_on(self, light_id: int) -> list[dict[str, Any]]:
         return self.set_light_state(light_id, on=True)
 
-    def turn_off(self, light_id: int) -> list:
+    def turn_off(self, light_id: int) -> list[dict[str, Any]]:
         return self.set_light_state(light_id, on=False)
 
-    def set_brightness(self, light_id: int, brightness: int) -> list:
+    def set_brightness(self, light_id: int, brightness: int) -> list[dict[str, Any]]:
         """brightness: 0-254"""
         return self.set_light_state(light_id, on=True, bri=brightness)
 
-    def set_color(self, light_id: int, hue: int, saturation: int = 254) -> list:
+    def set_color(self, light_id: int, hue: int, saturation: int = 254) -> list[dict[str, Any]]:
         """hue: 0-65535, saturation: 0-254"""
         return self.set_light_state(light_id, on=True, hue=hue, sat=saturation)
 
-    def set_temperature(self, light_id: int, ct: int) -> list:
+    def set_temperature(self, light_id: int, ct: int) -> list[dict[str, Any]]:
         """ct: 153-500 (warm to cool)"""
         return self.set_light_state(light_id, on=True, ct=ct)
 

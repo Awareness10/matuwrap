@@ -9,7 +9,7 @@ def notify(
     icon: str | None = None,
     urgency: str = "normal",
     timeout: int = 2000,
-    app_name: str = "pywrap",
+    app_name: str = "matuwrap",
 ) -> None:
     """Send a desktop notification via notify-send.
 

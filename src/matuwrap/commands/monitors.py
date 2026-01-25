@@ -1,8 +1,8 @@
 """Monitor information command."""
 
-from pywrap.core import hyprland
-from pywrap.core.hyprland import TRANSFORMS, swap_if_rotated
-from pywrap.core.theme import console, print_header, print_kv, print_error, fmt
+from matuwrap.core import hyprland
+from matuwrap.core.hyprland import TRANSFORMS, swap_if_rotated
+from matuwrap.core.theme import console, print_header, print_kv, print_error, fmt
 
 COMMAND = {
     "description": "Show monitor information",

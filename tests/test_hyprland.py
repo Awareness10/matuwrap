@@ -1,8 +1,8 @@
-"""Tests for pywrap.core.hyprland module."""
+"""Tests for matuwrap.core.hyprland module."""
 
 import unittest
 
-from pywrap.core.hyprland import TRANSFORMS, is_rotated, swap_if_rotated
+from matuwrap.core.hyprland import TRANSFORMS, is_rotated, swap_if_rotated
 
 
 class TestTransforms(unittest.TestCase):

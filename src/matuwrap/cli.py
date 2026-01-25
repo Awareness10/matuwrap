@@ -1,12 +1,12 @@
-"""CLI entry point for pywrap."""
+"""CLI entry point for matuwrap."""
 
 import argparse
 import importlib
 import pkgutil
 import sys
 
-from pywrap import commands
-from pywrap.core.theme import console, print_error
+from matuwrap import commands
+from matuwrap.core.theme import console, print_error
 
 
 def _discover_commands() -> dict[str, dict]:
@@ -15,7 +15,7 @@ def _discover_commands() -> dict[str, dict]:
     for module_info in pkgutil.iter_modules(commands.__path__):
         if module_info.name.startswith("_"):
             continue
-        module = importlib.import_module(f"pywrap.commands.{module_info.name}")
+        module = importlib.import_module(f"matuwrap.commands.{module_info.name}")
         if hasattr(module, "COMMAND"):
             discovered[module_info.name] = module.COMMAND
     return discovered
@@ -74,7 +74,7 @@ def main() -> int:
         parser.print_help()
         return 0
 
-    module = importlib.import_module(f"pywrap.commands.{args.command}")
+    module = importlib.import_module(f"matuwrap.commands.{args.command}")
     return module.run(*args.args)
 
 

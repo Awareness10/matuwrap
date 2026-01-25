@@ -1,4 +1,4 @@
-# pyWrap
+# matuwrap
 
 Hyprland system utilities with matugen-themed output and native Rust acceleration.
 
@@ -50,15 +50,15 @@ Native Rust module (`wrp_native`) provides significant speedups:
 | Matugen colors (cached) | 345ms | 0.02ms | ~15,000x |
 | Hyprland IPC | 2.1ms | 0.05ms | ~40x |
 
-- **Color caching**: Matugen results cached to `~/.cache/wrp/colors.json` with wallpaper mtime validation
+- **Color caching**: Matugen results cached to `~/.cache/matuwrap/colors.json` with wallpaper mtime validation
 - **Hyprland IPC**: Direct Unix socket communication instead of spawning `hyprctl`
 
 ## Adding Commands
 
-Create a file in `src/pywrap/commands/`:
+Create a file in `src/matuwrap/commands/`:
 
 ```python
-# src/pywrap/commands/mycommand.py
+# src/matuwrap/commands/mycommand.py
 """Short description."""
 
 COMMAND = {
@@ -79,7 +79,7 @@ Auto-discovered. Available immediately as `wrp mycommand`.
 
 ## Theme Helpers
 
-Import from `pywrap.core.theme`:
+Import from `matuwrap.core.theme`:
 
 | Function | Purpose |
 |----------|---------|
@@ -93,7 +93,7 @@ Import from `pywrap.core.theme`:
 ## Architecture
 
 ```
-src/pywrap/
+src/matuwrap/
 ├── cli.py              # Entry point, command discovery
 ├── commands/           # Auto-discovered command modules
 │   ├── audio.py        # PipeWire sink management

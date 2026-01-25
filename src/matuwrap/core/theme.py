@@ -5,7 +5,7 @@ from rich.table import Table
 from rich.panel import Panel
 from rich.theme import Theme
 
-from pywrap.core.colors import get_colors
+from matuwrap.core.colors import get_colors
 
 # Load colors from wallpaper (cached at import time)
 _colors = get_colors()

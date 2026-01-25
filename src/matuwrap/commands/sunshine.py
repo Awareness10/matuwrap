@@ -2,10 +2,10 @@
 
 from pathlib import Path
 
-from pywrap.core import hyprland, systemd
-from pywrap.core.hyprland import TRANSFORMS, swap_if_rotated
-from pywrap.core.notify import notify
-from pywrap.core.theme import (
+from matuwrap.core import hyprland, systemd
+from matuwrap.core.hyprland import TRANSFORMS, swap_if_rotated
+from matuwrap.core.notify import notify
+from matuwrap.core.theme import (
     console,
     print_header,
     print_kv,

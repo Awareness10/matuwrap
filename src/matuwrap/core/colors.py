@@ -11,7 +11,7 @@ _USE_NATIVE = False
 
 # Try native implementation
 try:
-    from pywrap.wrp_native import get_cached_colors as _native_get_colors # type: ignore
+    from matuwrap.wrp_native import get_cached_colors as _native_get_colors # type: ignore
     _USE_NATIVE = True
 except ImportError:
     _USE_NATIVE = False
@@ -91,10 +91,11 @@ def get_colors(wallpaper: Path | None = None) -> Colors:
         return Colors.default()
 
     if _USE_NATIVE:
-        assert _native_get_colors is not None
+        if _native_get_colors is None:
+            return Colors.default()
         colors = _native_get_colors(str(path))
         if colors is not None:
-            return Colors.from_dict(colors) # type: ignore
+            return Colors.from_dict(colors)  # type: ignore
         return Colors.default()
 
     # Fallback: no native, no matugen subprocess (removed for performance)

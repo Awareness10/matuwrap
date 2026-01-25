@@ -1,4 +1,4 @@
-//! Native acceleration for wrp CLI tool.
+//! Native acceleration for matuwrap CLI tool.
 //!
 //! Provides fast implementations of:
 //! - Hyprland IPC via Unix socket (no subprocess overhead)
@@ -99,7 +99,7 @@ struct ColorCache {
 }
 
 fn get_cache_path() -> Option<PathBuf> {
-    dirs::cache_dir().map(|p| p.join("wrp").join("colors.json"))
+    dirs::cache_dir().map(|p| p.join("matuwrap").join("colors.json"))
 }
 
 fn get_mtime(path: &str) -> Option<u64> {

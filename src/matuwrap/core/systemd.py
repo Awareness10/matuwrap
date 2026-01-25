@@ -66,10 +66,15 @@ def restart(name: str) -> bool:
 
 
 def get_logs(name: str, lines: int = 50) -> str:
-    """Get recent logs for a user service."""
+    """Get recent logs for a user service.
+
+    Returns empty string if journalctl fails.
+    """
     result = subprocess.run(
         ["journalctl", "--user", "-u", name, "-n", str(lines), "--no-pager"],
         capture_output=True,
         text=True,
     )
+    if result.returncode != 0:
+        return result.stderr or f"Failed to get logs for {name}"
     return result.stdout

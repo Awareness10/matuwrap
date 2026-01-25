@@ -5,12 +5,12 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING
 
-from pywrap.core.notify import notify
-from pywrap.core.theme import console, print_header, print_success, print_error, fmt
+from matuwrap.core.notify import notify
+from matuwrap.core.theme import console, print_header, print_success, print_error, fmt
 
 # Try native implementation
 try:
-    from pywrap.wrp_native import get_audio_sinks, set_default_sink, AudioSink
+    from matuwrap.wrp_native import get_audio_sinks, set_default_sink, AudioSink
     _USE_NATIVE = True
 except ImportError:
     _USE_NATIVE = False
@@ -18,7 +18,7 @@ except ImportError:
     set_default_sink = None  # type: ignore[assignment]
 
 if TYPE_CHECKING:
-    from pywrap.wrp_native import AudioSink
+    from matuwrap.wrp_native import AudioSink
 
 COMMAND = {
     "description": "Toggle audio between HDMI/Headset",

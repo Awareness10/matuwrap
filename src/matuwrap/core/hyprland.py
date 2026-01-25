@@ -12,7 +12,7 @@ _native_hyprctl_json: Optional[Callable[[str], str]] = None
 _USE_NATIVE = False
 
 try:
-    from pywrap.wrp_native import hyprctl as _native_hyprctl, hyprctl_json as _native_hyprctl_json
+    from matuwrap.wrp_native import hyprctl as _native_hyprctl, hyprctl_json as _native_hyprctl_json
     _USE_NATIVE = True
 except ImportError:
     logger.warning("Native module unavailable, using subprocess fallback (slower)")
@@ -61,8 +61,7 @@ def swap_if_rotated(width: int, height: int, transform: int) -> tuple[int, int]:
 
 def _run_hyprctl(*args: str) -> str:
     """Run hyprctl with arguments and return output."""
-    if _USE_NATIVE:
-        assert _native_hyprctl is not None
+    if _USE_NATIVE and _native_hyprctl is not None:
         command = " ".join(args)
         return _native_hyprctl(command)
     
@@ -79,14 +78,19 @@ def _run_hyprctl(*args: str) -> str:
 
 def _query_json(*args: str) -> Any:
     """Run hyprctl with -j flag and parse JSON output."""
-    if _USE_NATIVE:
-        assert _native_hyprctl_json is not None
+    if _USE_NATIVE and _native_hyprctl_json is not None:
         command = " ".join(args)
-        return json.loads(_native_hyprctl_json(command))
+        try:
+            return json.loads(_native_hyprctl_json(command))
+        except json.JSONDecodeError as e:
+            raise HyprlandError(f"Invalid JSON from hyprctl: {e}")
 
     # Fallback: use subprocess
     output = _run_hyprctl("-j", *args)
-    return json.loads(output)
+    try:
+        return json.loads(output)
+    except json.JSONDecodeError as e:
+        raise HyprlandError(f"Invalid JSON from hyprctl: {e}")
 
 
 def get_monitors() -> list[dict]:

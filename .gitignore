@@ -18,6 +18,12 @@ rust/target/
 # AI tools
 .claude/
 
+# Coverage
+htmlcov/
+.coverage
+coverage.xml
+coverage.json
+
 # Other
 *.md
 !README.md
