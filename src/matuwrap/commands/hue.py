@@ -56,12 +56,21 @@ class HueController:
         resp.raise_for_status()
         return resp.json()
 
+    def get_light(self, light_id: int) -> dict[str, Any]:
+        resp = requests.get(f"{self.base_url}/lights/{light_id}", timeout=10)
+        resp.raise_for_status()
+        return resp.json()
+
     def set_light_state(self, light_id: int, **kwargs: Any) -> list[dict[str, Any]]:
-        """Set light state (on, bri, hue, sat, ct, etc.)."""
         url = f"{self.base_url}/lights/{light_id}/state"
         resp = requests.put(url, json=kwargs, timeout=10)
         resp.raise_for_status()
         return resp.json()
+
+    def toggle(self, light_id: int) -> list[dict[str, Any]]:
+        light = self.get_light(light_id)
+        is_on = bool(light.get("state", {}).get("on", False))
+        return self.set_light_state(light_id, on=not is_on)
 
     def turn_on(self, light_id: int) -> list[dict[str, Any]]:
         return self.set_light_state(light_id, on=True)
