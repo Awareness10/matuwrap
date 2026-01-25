@@ -13,6 +13,7 @@ coverage-html:
 	xdg-open htmlcov/index.html
 
 build:
+	uv run maturin develop --release
 	uv run maturin build --release
 	uv tool install .
 
@@ -20,5 +21,5 @@ dev:
 	uv run maturin develop --release
 
 clean:
-	rm -rf build/ rust/target/ dist/ *.egg-info htmlcov/ .coverage coverage.xml
+	rm -rf build/ src/matuwrap/*.so rust/target/ dist/ *.egg-info htmlcov/ .coverage coverage.xml
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true

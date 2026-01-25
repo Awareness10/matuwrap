@@ -42,15 +42,19 @@ Alternative: Makefile
 
 ```bash
 wrp
-wrp -h                    # Show help
+wrp -h                             # Show help
 
-wrp monitors              # Show monitor info
-wrp audio                 # Toggle HDMI/Headset
-wrp audio show            # Show current sinks
-wrp sunshine              # Show status
-wrp sunshine start|stop   # Control service
-wrp sunshine monitors     # List capture monitors
-wrp sunshine monitor DP-1 # Set capture monitor
+wrp monitors                       # Show monitor info
+wrp audio                          # Toggle HDMI/Headset
+wrp audio show                     # Show current sinks
+wrp sunshine                       # Show status
+wrp sunshine start|stop            # Control service
+wrp sunshine monitors              # List capture monitors
+wrp sunshine monitor DP-1          # Set capture monitor
+wrp hue                            # Same as wrp hue list
+wrp hue <on/off> <id>              # Turn on light <id>
+wrp hue color <id> "<HEX>"         # Set color "<HEX>" for light <id>
+wrp hue brightness <id> <percent>  # Set brightness <percent> for light <id>
 ```
 
 ## Performance
@@ -105,7 +109,9 @@ Import from `matuwrap.core.theme`:
 ## Architecture
 
 ```
-src/matuwrap
+src/matuwrap/
+├── assets
+│   └── img
 ├── commands
 │   ├── audio.py
 │   ├── hue.py
@@ -122,10 +128,11 @@ src/matuwrap
 ├── cli.py
 ├── __init__.py
 ├── py.typed
-├── wrp_native.cpython-312-x86_64-linux-gnu.so
 └── wrp_native.pyi
 
 rust/
-├── Cargo.toml
-└── src/lib.rs          # PyO3 native module
+├── src
+│   └── lib.rs  # PyO3 native module
+├── Cargo.lock
+└── Cargo.toml 
 ```
