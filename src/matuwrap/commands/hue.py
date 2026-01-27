@@ -104,6 +104,74 @@ def _check_config() -> bool:
     return True
 
 
+def _hue_state_to_hex(state: dict[str, Any]) -> str | None:
+    """Convert Hue light state to hex color string.
+
+    Handles both color (hue/sat) and color temperature (ct) modes.
+    Returns None if no color info available.
+    """
+    colormode = state.get("colormode")
+    if colormode == "xy":
+        xy = state.get("xy")
+        if xy and len(xy) == 2:
+            x, y = xy
+            bri = state.get("bri", 254)
+            # CIE xy to RGB via XYZ
+            z = 1.0 - x - y
+            Y = bri / 254.0
+            X = (Y / y) * x if y > 0 else 0
+            Z = (Y / y) * z if y > 0 else 0
+            # Wide RGB D65 conversion
+            r = X * 1.656492 - Y * 0.354851 - Z * 0.255038
+            g = -X * 0.707196 + Y * 1.655397 + Z * 0.036152
+            b = X * 0.051713 - Y * 0.121364 + Z * 1.011530
+            # Gamma correction
+            for name, val in [("r", r), ("g", g), ("b", b)]:
+                if val <= 0.0031308:
+                    val = 12.92 * val
+                else:
+                    val = (1.0 + 0.055) * pow(val, 1.0 / 2.4) - 0.055
+                if name == "r":
+                    r = val
+                elif name == "g":
+                    g = val
+                else:
+                    b = val
+            ri = max(0, min(255, int(r * 255)))
+            gi = max(0, min(255, int(g * 255)))
+            bi = max(0, min(255, int(b * 255)))
+            return f"#{ri:02x}{gi:02x}{bi:02x}"
+    if colormode == "hs" or (state.get("hue") is not None and state.get("sat") is not None):
+        h = state.get("hue", 0) / 65535.0
+        s = state.get("sat", 0) / 254.0
+        v = state.get("bri", 254) / 254.0
+        import colorsys
+        r, g, b = colorsys.hsv_to_rgb(h, s, v)
+        return f"#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}"
+    if colormode == "ct" or state.get("ct") is not None:
+        ct = state.get("ct", 326)
+        # Approximate mired to RGB
+        kelvin = 1000000 / ct
+        # Tanner Helland algorithm
+        temp = kelvin / 100.0
+        if temp <= 66:
+            r = 255
+            g = 99.4708025861 * __import__("math").log(temp) - 161.1195681661
+            if temp <= 19:
+                b = 0
+            else:
+                b = 138.5177312231 * __import__("math").log(temp - 10) - 305.0447927307
+        else:
+            r = 329.698727446 * pow(temp - 60, -0.1332047592)
+            g = 288.1221695283 * pow(temp - 60, -0.0755148492)
+            b = 255
+        ri = max(0, min(255, int(r)))
+        gi = max(0, min(255, int(g)))
+        bi = max(0, min(255, int(b)))
+        return f"#{ri:02x}{gi:02x}{bi:02x}"
+    return None
+
+
 def _list_lights(hue: HueController) -> int:
     """List all lights and their status."""
     try:
@@ -114,7 +182,7 @@ def _list_lights(hue: HueController) -> int:
 
     print_header("Hue Lights")
 
-    table = create_table("ID", "Name", "State", "Brightness")
+    table = create_table("ID", "Name", "State", "Brightness", "Color")
     for light_id, light in sorted(lights.items(), key=lambda x: int(x[0])):
         state = light.get("state", {})
         is_on = state.get("on", False)
@@ -124,11 +192,17 @@ def _list_lights(hue: HueController) -> int:
             state_str = "[bool_on]ON[/bool_on]"
             bri_pct = round(bri / 254 * 100)
             bri_str = f"{fmt(bri_pct)}[muted]%[/muted]"
+            hex_color = _hue_state_to_hex(state)
+            if hex_color:
+                color_str = f"[{hex_color}]\u2588\u2588\u2588[/{hex_color}] [muted]{hex_color}[/muted]"
+            else:
+                color_str = "[muted]-[/muted]"
         else:
             state_str = "[muted]OFF[/muted]"
             bri_str = "[muted]-[/muted]"
+            color_str = "[muted]-[/muted]"
 
-        table.add_row(fmt(light_id), fix_emoji_width(light["name"]), state_str, bri_str)
+        table.add_row(fmt(light_id), fix_emoji_width(light["name"]), state_str, bri_str, color_str)
 
     console.print(table)
     return 0
