@@ -14,7 +14,7 @@ dependencies = [
 
 [project.optional-dependencies]
 gui = [
-    "pyqt6-theme @ file:///home/denzh/projects/pyQT",
+    "Glaze @ file:///home/denzh/projects/Glaze",
 ]
 
 [project.scripts]

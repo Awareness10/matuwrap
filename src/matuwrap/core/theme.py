@@ -39,9 +39,10 @@ THEME = _build_theme()
 console = Console(theme=THEME)
 
 
-def print_header(text: str) -> None:
+def print_header(text: str | None) -> None:
     """Print a styled header."""
-    console.print(f"\n[title]{text}[/title]")
+    if text is not None:
+        console.print(f"\n[title]{text}[/title]")
 
 
 def print_kv(label: str, value: str, label_width: int = 14) -> None:
