@@ -1,7 +1,6 @@
 import sys
 import os
 from dataclasses import dataclass
-from pathlib import Path
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QColor, QBrush, QFont
@@ -32,14 +31,14 @@ from PySide6.QtWidgets import (
 from matuwrap.commands.hue import HueController, _check_config
 from matuwrap.core.colors import get_colors, WALLPAPER_PATH
 
-# pyqt_theme imports
-from pyqt_theme import (
+# Glaze imports
+from glaze import (
     generate_theme,
     get_base_stylesheet,
     get_dialog_stylesheet,
     get_table_container_style,
 )
-from pyqt_theme.widgets import RoundedHeaderView, ThemedComboBox
+from glaze.widgets import RoundedHeaderView, ThemedComboBox
 
 
 def clamp(v: int, lo: int, hi: int) -> int:
@@ -129,9 +128,19 @@ class HueDashboard(QMainWindow):
     # ---------------- Theme ----------------
 
     def _load_theme(self):
-        """Load theme from wallpaper using pyqt_theme."""
+        """Load theme from wallpaper using Glaze."""
         wallpaper = str(WALLPAPER_PATH) if WALLPAPER_PATH.exists() else None
         self.theme, self._backend = generate_theme(image_path=wallpaper)
+
+    def _set_status_text(self, text: str, dot_color: str):
+        """Set status pill text with properly aligned colored dot."""
+        self.status_pill.setText(
+            f'<table cellpadding="0" cellspacing="0" align="center">'
+            f'<tr>'
+            f'<td style="vertical-align: middle; color: {dot_color}; font-size: 9px; padding-right: 4px; padding-left: 4x;">●</td>'
+            f'<td style="vertical-align: middle;">{text}</td>'
+            f'</tr></table>'
+        )
 
     # ---------------- UI ----------------
 
@@ -151,11 +160,12 @@ class HueDashboard(QMainWindow):
         title = QLabel("Hue Lights")
         title.setFont(QFont("", 16, QFont.Weight.Bold))
 
-        self.status_pill = QLabel("● Connected")
+        self.status_pill = QLabel()
         self.status_pill.setObjectName("statusPill")
         self.status_pill.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.status_pill.setFixedHeight(28)
-        self.status_pill.setFixedWidth(140)
+        self.status_pill.setFixedWidth(101)
+        self._set_status_text("Connected", "#4ade80")  # green
 
         title_row.addWidget(title)
         title_row.addStretch(1)
@@ -346,7 +356,7 @@ class HueDashboard(QMainWindow):
     def _apply_theme(self):
         t = self.theme
 
-        # Get base stylesheet from pyqt_theme
+        # Get base stylesheet from Glaze
         base_styles = get_base_stylesheet(t)
         dialog_styles = get_dialog_stylesheet(t)
         table_container_styles = get_table_container_style(t)
@@ -368,7 +378,7 @@ class HueDashboard(QMainWindow):
 
             QLabel#statusPill {{
                 border-radius: 14px;
-                padding: 0 10px;
+                padding: 0 10px 0 6px;
                 background: {t.bg_secondary};
                 border: 1px solid {t.border};
                 font-weight: 600;
@@ -403,6 +413,10 @@ class HueDashboard(QMainWindow):
             QCheckBox::indicator:checked {{
                 background-color: {t.accent};
                 border-color: {t.accent};
+            }}
+
+            QTableWidget::item {{
+                padding: 4px 8px;
             }}
         """
 
@@ -463,9 +477,9 @@ class HueDashboard(QMainWindow):
 
             self._rows_cache = rows
             self._apply_filters()
-            self.status_pill.setText("● Connected")
+            self._set_status_text("Connected", "#4ade80")
         except Exception as e:
-            self.status_pill.setText("● Error")
+            self._set_status_text("Error", "#f87171")
             QMessageBox.critical(self, "Hue Error", str(e))
 
     def _apply_filters(self):
