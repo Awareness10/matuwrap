@@ -532,14 +532,21 @@ class HueDashboard(QMainWindow):
                 bri_item = QTableWidgetItem(f"{bri_pct}%")
                 bri_item.setForeground(QBrush(text_secondary))
 
-                # Color pill
-                color_item = QTableWidgetItem("-")
+                # Color pill - use widget to override stylesheet background
+                color_label = QLabel("-")
+                color_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 if row.is_on and row.hue is not None and row.sat is not None:
                     qc = hue_sat_to_qcolor(int(row.hue), int(row.sat), max(row.bri, 30))
-                    color_item.setText(qc.name())
-                    color_item.setBackground(QBrush(qc))
-                    color_item.setForeground(QBrush(contrast_text(qc)))
-                    color_item.setFont(QFont("", 10, QFont.Weight.Bold))
+                    text_color = contrast_text(qc)
+                    color_label.setText(qc.name())
+                    color_label.setStyleSheet(f"""
+                        background-color: {qc.name()};
+                        color: {text_color.name()};
+                        font-size: 10px;
+                        font-weight: bold;
+                        border-radius: 4px;
+                        padding: 2px 4px;
+                    """)
 
                 # Temp
                 ct_item = QTableWidgetItem(str(row.ct) if row.ct is not None else "-")
@@ -549,7 +556,7 @@ class HueDashboard(QMainWindow):
                 self.table.setItem(r, 1, name_item)
                 self.table.setItem(r, 2, state_item)
                 self.table.setItem(r, 3, bri_item)
-                self.table.setItem(r, 4, color_item)
+                self.table.setCellWidget(r, 4, color_label)
                 self.table.setItem(r, 5, ct_item)
 
             # restore selection

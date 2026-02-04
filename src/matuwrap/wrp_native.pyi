@@ -49,7 +49,7 @@ def hyprctl_json(command: str) -> str:
 
 # Matugen color caching
 
-def get_cached_colors(wallpaper_path: str) -> dict[str, str] | None:
+def get_cached_colors(wallpaper_path: str) -> dict[str, str]:
     """Get matugen colors with caching.
 
     Colors are cached to ~/.cache/matuwrap/colors.json and validated
