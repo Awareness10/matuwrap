@@ -48,17 +48,17 @@ def ps1() -> str:
         return "\\u@\\h:\\w"
 
     parts = []
-    tertiary = colors.get("tertiary")
-    if tertiary:
-        parts.append(f"{_hex_to_ps1(tertiary)}\\u@\\h{reset}")
+    primary = colors.get("primary")
+    if primary:
+        parts.append(f"{_hex_to_ps1(primary)}\\u@\\h{reset}")
     else:
         parts.append("\\u@\\h")
 
     parts.append(":")
 
-    primary_hex = colors.get("primary")
-    if primary_hex:
-        parts.append(f"{_hex_to_ps1(primary_hex)}\\w{reset}")
+    tertiary = colors.get("tertiary")
+    if tertiary:
+        parts.append(f"{_hex_to_ps1(tertiary)}\\w{reset}")
     else:
         parts.append("\\w")
 
