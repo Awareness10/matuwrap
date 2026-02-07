@@ -58,6 +58,10 @@ wrp hue                            # Same as wrp hue list
 wrp hue <on/off> <id>              # Turn on light <id>
 wrp hue color <id> "<HEX>"         # Set color "<HEX>" for light <id>
 wrp hue brightness <id> <percent>  # Set brightness <percent> for light <id>
+wrp hue theme <id>                 # Set color to THEME_PRIMARY for light <id>
+wrp get_color                      # Get primary color from theme
+wrp get_color ps1                  # Get PS1 prompt precomputed with style
+wrp hue gui                        # Open graphical user interface
 ```
 
 ## Performance

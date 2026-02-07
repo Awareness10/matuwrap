@@ -45,7 +45,7 @@ exclude_lines = [
 directory = "htmlcov"
 
 [tool.uv.sources]
-glaze = { path = "../Glaze" }
+glaze = { git = "https://github.com/awareness10/glaze" }
 
 [dependency-groups]
 dev = [
