@@ -117,6 +117,7 @@ src/matuwrap/
 │   └── img
 ├── commands
 │   ├── audio.py
+│   ├── get_colors.py
 │   ├── hue.py
 │   ├── __init__.py
 │   ├── monitors.py
@@ -128,14 +129,19 @@ src/matuwrap/
 │   ├── notify.py
 │   ├── systemd.py
 │   └── theme.py
+├── gui
+│   ├── hue_gui.py
+│   └── ___init__.py
 ├── cli.py
 ├── __init__.py
 ├── py.typed
+├── wrp_native.cpython-312-x86_64-linux-gnu.so (*)
 └── wrp_native.pyi
 
 rust/
 ├── src
-│   └── lib.rs  # PyO3 native module
+│   └── lib.rs
 ├── Cargo.lock
 └── Cargo.toml 
 ```
+(\*) *generated file*

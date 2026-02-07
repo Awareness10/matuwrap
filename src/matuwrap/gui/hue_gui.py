@@ -64,7 +64,7 @@ def hue_sat_to_qcolor(hue: int, sat: int, bri: int = 254) -> QColor:
 
 def contrast_text(bg: QColor) -> QColor:
     # simple luminance heuristic
-    r, g, b, _ = bg.getRgb()
+    r, g, b, _ = bg.getRgb() # type: ignore
     lum = (0.299 * r + 0.587 * g + 0.114 * b)
     return QColor("#111111") if lum > 160 else QColor("#f2f2f2")
 
@@ -722,9 +722,12 @@ class HueDashboard(QMainWindow):
 
         self.hue.set_color(light_id, hue_val, sat_val)
 
-
-if __name__ == "__main__":
+def main():
     app = QApplication(sys.argv)
     win = HueDashboard()
     win.show()
-    sys.exit(app.exec())
+    #sys.exit(app.exec())
+    return app.exec()
+
+if __name__ == "__main__":
+    main()

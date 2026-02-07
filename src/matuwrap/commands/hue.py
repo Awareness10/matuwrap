@@ -37,6 +37,7 @@ COMMAND = {
         ("color", "<id> <hue> [sat]", "Set color (hue: 0-65535, sat: 0-254)"),
         ("temp", "<id> <153-500>", "Set color temperature (153=warm, 500=cool)"),
         ("theme", "<id> [color]", "Set light to matugen theme color (default: primary)"),
+        ("gui", "", "Open graphical user interface"),
     ],
 }
 
@@ -452,6 +453,10 @@ def run(*args: str) -> int:
             return 1
         color_name = args[2] if len(args) >= 3 else "primary"
         return _set_theme(hue, light_id, color_name)
+    
+    elif cmd == "gui":
+        from matuwrap.gui.hue_gui import main as _gui
+        return _gui()
 
     else:
         print_error(f"Unknown subcommand: {fmt(cmd)}")
