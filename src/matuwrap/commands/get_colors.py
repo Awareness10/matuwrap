@@ -50,7 +50,7 @@ def ps1() -> str:
     parts = []
     primary = colors.get("primary")
     if primary:
-        parts.append(f"{_hex_to_ps1(primary)}\\u@\\h{reset}")
+        parts.append(f"{_hex_to_ps1(primary)}\\u{reset}@{_hex_to_ps1(primary)}\\h{reset}")
     else:
         parts.append("\\u@\\h")
 
