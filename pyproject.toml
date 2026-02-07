@@ -1,21 +1,18 @@
 [project]
 name = "matuwrap"
-version = "0.1.1"
+version = "0.1.2"
 description = "Hyprland system utilities with matugen-themed output"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "dotenv>=0.9.9",
+    "glaze",
     "pyside6>=6.10.1",
     "requests>=2.32.5",
     "rich>=14.0.0",
     "wcwidth>=0.2.13",
 ]
 
-[project.optional-dependencies]
-gui = [
-    "pyqt6-theme @ file:///home/denzh/projects/pyQT",
-]
 
 [project.scripts]
 wrp = "matuwrap.cli:main"
@@ -46,6 +43,9 @@ exclude_lines = [
 
 [tool.coverage.html]
 directory = "htmlcov"
+
+[tool.uv.sources]
+glaze = { path = "../Glaze" }
 
 [dependency-groups]
 dev = [

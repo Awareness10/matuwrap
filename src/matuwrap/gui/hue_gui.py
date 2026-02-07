@@ -1,7 +1,6 @@
 import sys
 import os
 from dataclasses import dataclass
-from pathlib import Path
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QColor, QBrush, QFont
@@ -32,14 +31,14 @@ from PySide6.QtWidgets import (
 from matuwrap.commands.hue import HueController, _check_config
 from matuwrap.core.colors import get_colors, WALLPAPER_PATH
 
-# pyqt_theme imports
-from pyqt_theme import (
+# Glaze imports
+from glaze import (
     generate_theme,
     get_base_stylesheet,
     get_dialog_stylesheet,
     get_table_container_style,
 )
-from pyqt_theme.widgets import RoundedHeaderView, ThemedComboBox
+from glaze.widgets import RoundedHeaderView, ThemedComboBox
 
 
 def clamp(v: int, lo: int, hi: int) -> int:
@@ -65,7 +64,7 @@ def hue_sat_to_qcolor(hue: int, sat: int, bri: int = 254) -> QColor:
 
 def contrast_text(bg: QColor) -> QColor:
     # simple luminance heuristic
-    r, g, b, _ = bg.getRgb()
+    r, g, b, _ = bg.getRgb() # type: ignore
     lum = (0.299 * r + 0.587 * g + 0.114 * b)
     return QColor("#111111") if lum > 160 else QColor("#f2f2f2")
 
@@ -129,9 +128,19 @@ class HueDashboard(QMainWindow):
     # ---------------- Theme ----------------
 
     def _load_theme(self):
-        """Load theme from wallpaper using pyqt_theme."""
+        """Load theme from wallpaper using Glaze."""
         wallpaper = str(WALLPAPER_PATH) if WALLPAPER_PATH.exists() else None
         self.theme, self._backend = generate_theme(image_path=wallpaper)
+
+    def _set_status_text(self, text: str, dot_color: str):
+        """Set status pill text with properly aligned colored dot."""
+        self.status_pill.setText(
+            f'<table cellpadding="0" cellspacing="0" align="center">'
+            f'<tr>'
+            f'<td style="vertical-align: middle; color: {dot_color}; font-size: 9px; padding-right: 4px; padding-left: 4x;">●</td>'
+            f'<td style="vertical-align: middle;">{text}</td>'
+            f'</tr></table>'
+        )
 
     # ---------------- UI ----------------
 
@@ -151,11 +160,12 @@ class HueDashboard(QMainWindow):
         title = QLabel("Hue Lights")
         title.setFont(QFont("", 16, QFont.Weight.Bold))
 
-        self.status_pill = QLabel("● Connected")
+        self.status_pill = QLabel()
         self.status_pill.setObjectName("statusPill")
         self.status_pill.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.status_pill.setFixedHeight(28)
-        self.status_pill.setFixedWidth(140)
+        self.status_pill.setFixedWidth(101)
+        self._set_status_text("Connected", "#4ade80")  # green
 
         title_row.addWidget(title)
         title_row.addStretch(1)
@@ -346,7 +356,7 @@ class HueDashboard(QMainWindow):
     def _apply_theme(self):
         t = self.theme
 
-        # Get base stylesheet from pyqt_theme
+        # Get base stylesheet from Glaze
         base_styles = get_base_stylesheet(t)
         dialog_styles = get_dialog_stylesheet(t)
         table_container_styles = get_table_container_style(t)
@@ -368,7 +378,7 @@ class HueDashboard(QMainWindow):
 
             QLabel#statusPill {{
                 border-radius: 14px;
-                padding: 0 10px;
+                padding: 0 10px 0 6px;
                 background: {t.bg_secondary};
                 border: 1px solid {t.border};
                 font-weight: 600;
@@ -403,6 +413,10 @@ class HueDashboard(QMainWindow):
             QCheckBox::indicator:checked {{
                 background-color: {t.accent};
                 border-color: {t.accent};
+            }}
+
+            QTableWidget::item {{
+                padding: 4px 8px;
             }}
         """
 
@@ -463,9 +477,9 @@ class HueDashboard(QMainWindow):
 
             self._rows_cache = rows
             self._apply_filters()
-            self.status_pill.setText("● Connected")
+            self._set_status_text("Connected", "#4ade80")
         except Exception as e:
-            self.status_pill.setText("● Error")
+            self._set_status_text("Error", "#f87171")
             QMessageBox.critical(self, "Hue Error", str(e))
 
     def _apply_filters(self):
@@ -518,14 +532,21 @@ class HueDashboard(QMainWindow):
                 bri_item = QTableWidgetItem(f"{bri_pct}%")
                 bri_item.setForeground(QBrush(text_secondary))
 
-                # Color pill
-                color_item = QTableWidgetItem("-")
+                # Color pill - use widget to override stylesheet background
+                color_label = QLabel("-")
+                color_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 if row.is_on and row.hue is not None and row.sat is not None:
                     qc = hue_sat_to_qcolor(int(row.hue), int(row.sat), max(row.bri, 30))
-                    color_item.setText(qc.name())
-                    color_item.setBackground(QBrush(qc))
-                    color_item.setForeground(QBrush(contrast_text(qc)))
-                    color_item.setFont(QFont("", 10, QFont.Weight.Bold))
+                    text_color = contrast_text(qc)
+                    color_label.setText(qc.name())
+                    color_label.setStyleSheet(f"""
+                        background-color: {qc.name()};
+                        color: {text_color.name()};
+                        font-size: 10px;
+                        font-weight: bold;
+                        border-radius: 4px;
+                        padding: 2px 4px;
+                    """)
 
                 # Temp
                 ct_item = QTableWidgetItem(str(row.ct) if row.ct is not None else "-")
@@ -535,7 +556,7 @@ class HueDashboard(QMainWindow):
                 self.table.setItem(r, 1, name_item)
                 self.table.setItem(r, 2, state_item)
                 self.table.setItem(r, 3, bri_item)
-                self.table.setItem(r, 4, color_item)
+                self.table.setCellWidget(r, 4, color_label)
                 self.table.setItem(r, 5, ct_item)
 
             # restore selection
@@ -701,9 +722,12 @@ class HueDashboard(QMainWindow):
 
         self.hue.set_color(light_id, hue_val, sat_val)
 
-
-if __name__ == "__main__":
+def main():
     app = QApplication(sys.argv)
     win = HueDashboard()
     win.show()
-    sys.exit(app.exec())
+    #sys.exit(app.exec())
+    return app.exec()
+
+if __name__ == "__main__":
+    main()
