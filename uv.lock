@@ -155,30 +155,10 @@ wheels = [
 
 [[package]]
 name = "glaze"
-version = "0.1.0"
-source = { directory = "../Glaze" }
+version = "0.2.0"
+source = { git = "https://github.com/awareness10/glaze#0de18ce6ac122f2a506d4f636102244af9a8dc59" }
 dependencies = [
     { name = "pyside6" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "nuitka", marker = "extra == 'dev'", specifier = ">=2.8.9" },
-    { name = "ordered-set", marker = "extra == 'dev'", specifier = ">=4.1.0" },
-    { name = "pillow", marker = "extra == 'dev'", specifier = ">=12.0.0" },
-    { name = "pyside6", specifier = ">=6.6.0" },
-    { name = "rich", marker = "extra == 'dev'", specifier = ">=14.2.0" },
-    { name = "zstandard", marker = "extra == 'dev'", specifier = ">=0.23.0" },
-]
-provides-extras = ["dev"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "nuitka", specifier = ">=2.8.9" },
-    { name = "ordered-set", specifier = ">=4.1.0" },
-    { name = "pillow", specifier = ">=12.0.0" },
-    { name = "rich", specifier = ">=14.2.0" },
-    { name = "zstandard", specifier = ">=0.23.0" },
 ]
 
 [[package]]
@@ -204,7 +184,7 @@ wheels = [
 
 [[package]]
 name = "matuwrap"
-version = "0.1.1"
+version = "0.1.2"
 source = { editable = "." }
 dependencies = [
     { name = "dotenv" },
@@ -223,7 +203,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "dotenv", specifier = ">=0.9.9" },
-    { name = "glaze", directory = "../Glaze" },
+    { name = "glaze", git = "https://github.com/awareness10/glaze" },
     { name = "pyside6", specifier = ">=6.10.1" },
     { name = "requests", specifier = ">=2.32.5" },
     { name = "rich", specifier = ">=14.0.0" },
