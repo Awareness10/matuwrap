@@ -90,10 +90,12 @@ def get_colors(wallpaper: Path | None = None) -> Colors:
     if not path.exists():
         return Colors.default()
 
+    resolved = str(path.resolve())
+
     if _USE_NATIVE:
         if _native_get_colors is None:
             return Colors.default()
-        colors = _native_get_colors(str(path))
+        colors = _native_get_colors(resolved)
         if colors is not None:
             return Colors.from_dict(colors)  # type: ignore
         return Colors.default()

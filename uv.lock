@@ -156,7 +156,7 @@ wheels = [
 [[package]]
 name = "glaze"
 version = "0.2.0"
-source = { git = "https://github.com/awareness10/glaze#0de18ce6ac122f2a506d4f636102244af9a8dc59" }
+source = { git = "https://github.com/awareness10/glaze#26acc63fd456b79e1e9a2075aafa13f5d28f4dc7" }
 dependencies = [
     { name = "pyside6" },
 ]
@@ -184,7 +184,7 @@ wheels = [
 
 [[package]]
 name = "matuwrap"
-version = "0.1.2"
+version = "0.1.3"
 source = { editable = "." }
 dependencies = [
     { name = "dotenv" },

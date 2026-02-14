@@ -129,7 +129,7 @@ class HueDashboard(QMainWindow):
 
     def _load_theme(self):
         """Load theme from wallpaper using Glaze."""
-        wallpaper = str(WALLPAPER_PATH) if WALLPAPER_PATH.exists() else None
+        wallpaper = str(WALLPAPER_PATH.resolve()) if WALLPAPER_PATH.exists() else None
         self.theme, self._backend = generate_theme(image_path=wallpaper)
 
     def _set_status_text(self, text: str, dot_color: str):

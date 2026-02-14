@@ -146,17 +146,23 @@ fn save_cache(wallpaper_path: &str, colors: &HashMap<String, String>) -> Option<
 }
 
 fn run_matugen(wallpaper_path: &str) -> Option<HashMap<String, String>> {
+    // Resolve symlinks so matugen gets a real file path
+    let resolved = std::fs::canonicalize(wallpaper_path)
+        .ok()?;
+    let resolved_str = resolved.to_str()?;
+
     let output = Command::new("matugen")
         .args([
             "image",
-            wallpaper_path,
-            "--dry-run",
-            "--json",
-            "hex",
-            "--type",
+            resolved_str,
+            "-t",
             "scheme-tonal-spot",
-            "--mode",
+            "-m",
             "dark",
+            "-j",
+            "hex",
+            "--source-color-index",
+            "0",
         ])
         .output()
         .ok()?;
@@ -166,31 +172,41 @@ fn run_matugen(wallpaper_path: &str) -> Option<HashMap<String, String>> {
     }
 
     let stdout = String::from_utf8_lossy(&output.stdout);
-
+    
     // Parse JSON (matugen outputs on stdout)
     let json: serde_json::Value = serde_json::from_str(&stdout).ok()?;
     let colors_obj = json.get("colors")?;
-
     let mut colors = HashMap::new();
+
     if let Some(obj) = colors_obj.as_object() {
         for (key, val) in obj {
-            // Extract dark mode value
-            let color = if let Some(dark) = val.get("dark").and_then(|v| v.as_str()) {
-                dark.to_string()
-            } else if let Some(default) = val.get("default").and_then(|v| v.as_str()) {
-                default.to_string()
-            } else if let Some(s) = val.as_str() {
-                s.to_string()
-            } else {
-                continue;
-            };
-            colors.insert(key.clone(), color);
+            // matugen 4.0.0 structure: {color_name: {dark: {color: "#hex"}, light: {...}}}
+            let color = val
+                .get("dark")
+                .and_then(|dark| dark.get("color"))
+                .and_then(|c| c.as_str())
+                .map(|s| s.to_string())
+                .or_else(|| {
+                    val.get("default")
+                        .and_then(|def| def.get("color"))
+                        .and_then(|c| c.as_str())
+                        .map(|s| s.to_string())
+                })
+                .or_else(|| {
+                    val.get("light")
+                        .and_then(|light| light.get("color"))
+                        .and_then(|c| c.as_str())
+                        .map(|s| s.to_string())
+                });
+
+            if let Some(hex) = color {
+                colors.insert(key.clone(), hex);
+            }
         }
     }
 
     Some(colors)
 }
-
 /// Get matugen colors with caching.
 /// Returns a dict of color_name -> hex_value.
 /// Returns None if matugen fails (caller should use defaults).

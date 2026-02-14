@@ -84,6 +84,9 @@ ff() {
         --logo-color-1 "$AW_COLOR" \
         --logo-color-2 "$AW_COLOR"
 }
+
+# Run fastfetch on shell startup (AW_COLOR is set by reload-colors above)
+command -v fastfetch >/dev/null 2>&1 && ff
 """
 
 
@@ -144,13 +147,18 @@ def _find_prompt_region(lines: list[str]) -> tuple[int, int] | None:
 
 
 def _find_insert_point(lines: list[str]) -> int:
-    """Fallback insertion point when no prompt region is detected."""
-    # After the TERM / color_prompt case block
+    """Find the best insertion point — after the last PATH/export setup.
+
+    The matuwrap script calls `wrp` which lives in ~/.local/bin, so it must
+    be sourced *after* all PATH exports to ensure `command -v wrp` succeeds.
+    """
+    # After the last line that modifies PATH
+    last_path = None
     for i, line in enumerate(lines):
-        if "color_prompt=yes" in line:
-            for j in range(i, len(lines)):
-                if lines[j].strip() == "esac":
-                    return j + 1
+        if re.search(r"\bPATH\b", line) and not line.strip().startswith("#"):
+            last_path = i
+    if last_path is not None:
+        return last_path + 1
 
     # After non-interactive guard
     for i, line in enumerate(lines):
@@ -168,18 +176,24 @@ def _patch_bashrc() -> bool:
         return False
 
     text = BASHRC.read_text()
-    has_source = SOURCE_LINE in text
+    lines = text.splitlines()
     has_old = bool(_PROMPT_RE.search(text))
 
-    # Already sourced and no stale prompt lines → nothing to do
-    if has_source and not has_old:
+    # Check if source line exists and is already after all PATH exports
+    source_idx = None
+    for i, l in enumerate(lines):
+        if SOURCE_LINE in l:
+            source_idx = i
+            break
+    ideal_pos = _find_insert_point(lines)
+    already_ok = source_idx is not None and source_idx >= ideal_pos and not has_old
+
+    if already_ok:
         return False
 
     backup = _backup(BASHRC)
     if backup:
         print_warning(f"Backed up  {backup}")
-
-    lines = text.splitlines()
 
     # Strip any existing matuwrap source / comment lines (will re-add in position)
     lines = [
@@ -187,18 +201,21 @@ def _patch_bashrc() -> bool:
         if SOURCE_LINE not in l and l.strip() != "# matuwrap shell integration"
     ]
 
-    source_block = ["", "# matuwrap shell integration", SOURCE_LINE, ""]
+    source_block = ["", "# matuwrap shell integration", SOURCE_LINE]
 
+    # Remove old prompt region (git-prompt, venv, PS1, etc.) — matuwrap handles it
     region = _find_prompt_region(lines)
     if region:
         start, end = region
-        lines[start : end + 1] = source_block
+        # Collapse to a single blank line so surrounding sections stay spaced
+        lines[start : end + 1] = [""]
         console.print(
-            f"[muted]Replaced prompt region (lines {start + 1}–{end + 1})[/muted]"
+            f"[muted]Removed old prompt region (lines {start + 1}–{end + 1})[/muted]"
         )
-    else:
-        pos = _find_insert_point(lines)
-        lines[pos:pos] = source_block
+
+    # Insert source line after all PATH exports so `wrp` is on PATH
+    pos = _find_insert_point(lines)
+    lines[pos:pos] = source_block
 
     BASHRC.write_text("\n".join(lines) + "\n")
     print_success(f"Patched    {BASHRC}")
