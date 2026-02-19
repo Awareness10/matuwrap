@@ -117,29 +117,31 @@ Import from `matuwrap.core.theme`:
 
 ```
 src/matuwrap/
-├── assets
-│   └── img
-├── commands
+├── assets/
+│   └── img/
+├── commands/
+│   ├── __init__.py
+│   ├── .env
 │   ├── audio.py
 │   ├── get_colors.py
 │   ├── hue.py
-│   ├── __init__.py
+│   ├── install.py
 │   ├── monitors.py
 │   └── sunshine.py
-├── core
+├── core/
+│   ├── __init__.py
 │   ├── colors.py
 │   ├── hyprland.py
-│   ├── __init__.py
 │   ├── notify.py
 │   ├── systemd.py
 │   └── theme.py
-├── gui
-│   ├── hue_gui.py
-│   └── ___init__.py
+├── gui/
+│   ├── __init__.py
+│   └── hue_gui.py
 ├── cli.py
 ├── __init__.py
 ├── py.typed
-├── wrp_native.cpython-312-x86_64-linux-gnu.so (*)
+├── wrp_native.cpython-314-x86_64-linux-gnu.so (*)
 └── wrp_native.pyi
 
 rust/
