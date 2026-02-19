@@ -22,14 +22,42 @@ SOURCE_LINE = f"source {SCRIPT_PATH}"
 BASH_INTEGRATION = r"""# matuwrap shell integration
 # Source this from .bashrc:  source ~/.config/matuwrap/scripts/matuwrap
 
-# --- Matugen color loading ------------------------------------------------
+# --- Matugen color loading (cached) --------------------------------------
 
-reload-colors() {
-    export WRP_PS1="$(wrp get_colors ps1 2>/dev/null)"
-    export AW_COLOR="$(wrp get_colors 2>/dev/null)"
+_MW_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/matuwrap"
+_MW_CACHE_PS1="$_MW_CACHE_DIR/ps1"
+_MW_CACHE_COLOR="$_MW_CACHE_DIR/color"
+_MW_WALL="$HOME/.current.wall"
+
+# Regenerate shell cache files via wrp (slow, only on wallpaper change)
+_mw_regen_cache() {
+    mkdir -p "$_MW_CACHE_DIR"
+    wrp get_colors ps1 2>/dev/null > "$_MW_CACHE_PS1"
+    wrp get_colors     2>/dev/null > "$_MW_CACHE_COLOR"
 }
 
-command -v wrp >/dev/null 2>&1 && reload-colors
+# Load colors from cache files (instant)
+_mw_load_cache() {
+    [ -f "$_MW_CACHE_PS1" ]   && WRP_PS1="$(<"$_MW_CACHE_PS1")"
+    [ -f "$_MW_CACHE_COLOR" ] && AW_COLOR="$(<"$_MW_CACHE_COLOR")"
+    export WRP_PS1 AW_COLOR
+}
+
+# Force reload: regenerate cache then load
+reload-colors() {
+    _mw_regen_cache
+    _mw_load_cache
+}
+
+# On shell startup: use cache if fresh, else regenerate
+if command -v wrp >/dev/null 2>&1; then
+    if [ -f "$_MW_WALL" ] && [ -f "$_MW_CACHE_PS1" ] && \
+       [ ! "$_MW_WALL" -nt "$_MW_CACHE_PS1" ]; then
+        _mw_load_cache
+    else
+        reload-colors
+    fi
+fi
 
 # --- Git prompt -----------------------------------------------------------
 
@@ -210,7 +238,7 @@ def _patch_bashrc() -> bool:
         # Collapse to a single blank line so surrounding sections stay spaced
         lines[start : end + 1] = [""]
         console.print(
-            f"[muted]Removed old prompt region (lines {start + 1}–{end + 1})[/muted]"
+            f"[muted]Removed old prompt region (lines {start + 1}-{end + 1})[/muted]"
         )
 
     # Insert source line after all PATH exports so `wrp` is on PATH
@@ -235,7 +263,7 @@ def _install_bash() -> int:
     print_success(f"Installed  {SCRIPT_PATH}")
 
     if not _patch_bashrc():
-        console.print(f"[muted].bashrc already sources matuwrap[/muted]")
+        console.print("[muted].bashrc already sources matuwrap[/muted]")
 
     console.print()
     console.print("[muted]Reload:  source ~/.bashrc[/muted]")
