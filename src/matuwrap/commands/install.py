@@ -49,10 +49,21 @@ reload-colors() {
     _mw_load_cache
 }
 
+# Check if wallpaper symlink changed since cache was written.
+# Uses stat on the symlink itself (not -L) so re-pointing the symlink
+# is detected even if the target image file is older than the cache.
+_mw_cache_fresh() {
+    [ -f "$_MW_CACHE_PS1" ] || return 1
+    [ -e "$_MW_WALL" ]      || return 1
+    local wall_mt cache_mt
+    wall_mt=$(stat -c %Y "$_MW_WALL" 2>/dev/null)      || return 1
+    cache_mt=$(stat -c %Y "$_MW_CACHE_PS1" 2>/dev/null) || return 1
+    [ "$wall_mt" -le "$cache_mt" ]
+}
+
 # On shell startup: use cache if fresh, else regenerate
 if command -v wrp >/dev/null 2>&1; then
-    if [ -f "$_MW_WALL" ] && [ -f "$_MW_CACHE_PS1" ] && \
-       [ ! "$_MW_WALL" -nt "$_MW_CACHE_PS1" ]; then
+    if _mw_cache_fresh; then
         _mw_load_cache
     else
         reload-colors
