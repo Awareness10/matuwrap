@@ -31,7 +31,7 @@ COMMAND = {
     ],
 }
 
-SERVICE_NAME = "sunshine"
+SERVICE_NAME = "app-dev.lizardbyte.app.Sunshine"
 CONFIG_PATH = Path.home() / ".config" / "sunshine" / "sunshine.conf"
 
 
