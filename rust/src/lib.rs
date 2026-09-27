@@ -94,7 +94,10 @@ fn hyprctl_json(command: &str) -> PyResult<String> {
 #[derive(Serialize, Deserialize)]
 struct ColorCache {
     wallpaper_path: String,
-    wallpaper_mtime: u64,
+    // The symlink's target: wallpapers copied in the same second share an
+    // mtime, so the mtime alone can't tell a re-pointed symlink apart
+    wallpaper_target: String,
+    wallpaper_mtime_ns: u64,
     colors: HashMap<String, String>,
 }
 
@@ -102,14 +105,18 @@ fn get_cache_path() -> Option<PathBuf> {
     dirs::cache_dir().map(|p| p.join("matuwrap").join("colors.json"))
 }
 
-fn get_mtime(path: &str) -> Option<u64> {
+fn get_mtime_ns(path: &str) -> Option<u64> {
     fs::metadata(path)
         .ok()?
         .modified()
         .ok()?
         .duration_since(SystemTime::UNIX_EPOCH)
         .ok()
-        .map(|d| d.as_secs())
+        .map(|d| d.as_nanos() as u64)
+}
+
+fn get_target(path: &str) -> Option<String> {
+    fs::canonicalize(path).ok()?.to_str().map(str::to_string)
 }
 
 fn load_cache(wallpaper_path: &str) -> Option<HashMap<String, String>> {
@@ -117,13 +124,12 @@ fn load_cache(wallpaper_path: &str) -> Option<HashMap<String, String>> {
     let data = fs::read_to_string(&cache_path).ok()?;
     let cache: ColorCache = serde_json::from_str(&data).ok()?;
 
-    // Validate cache
-    if cache.wallpaper_path != wallpaper_path {
-        return None;
-    }
-
-    let current_mtime = get_mtime(wallpaper_path)?;
-    if cache.wallpaper_mtime != current_mtime {
+    // Validate cache (caches from older versions lack the new fields and
+    // fail to parse above, which also counts as a miss)
+    if cache.wallpaper_path != wallpaper_path
+        || cache.wallpaper_target != get_target(wallpaper_path)?
+        || cache.wallpaper_mtime_ns != get_mtime_ns(wallpaper_path)?
+    {
         return None;
     }
 
@@ -136,7 +142,8 @@ fn save_cache(wallpaper_path: &str, colors: &HashMap<String, String>) -> Option<
 
     let cache = ColorCache {
         wallpaper_path: wallpaper_path.to_string(),
-        wallpaper_mtime: get_mtime(wallpaper_path)?,
+        wallpaper_target: get_target(wallpaper_path)?,
+        wallpaper_mtime_ns: get_mtime_ns(wallpaper_path)?,
         colors: colors.clone(),
     };
 
@@ -163,6 +170,9 @@ fn run_matugen(wallpaper_path: &str) -> Option<HashMap<String, String>> {
             "hex",
             "--source-color-index",
             "0",
+            // Only print the colors; without this matugen also applies every
+            // template in the user's config and sets the wallpaper again
+            "--dry-run",
         ])
         .output()
         .ok()?;
