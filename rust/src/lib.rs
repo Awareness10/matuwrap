@@ -152,6 +152,19 @@ fn save_cache(wallpaper_path: &str, colors: &HashMap<String, String>) -> Option<
     Some(())
 }
 
+// aw-shell renders its current palette here (a matugen template) on every
+// theme change. Using it keeps the terminal on the scheme or custom color
+// picked in aw-shell, which a tonal-spot matugen run here can't know about.
+fn aw_shell_colors_path() -> Option<PathBuf> {
+    dirs::config_dir().map(|p| p.join("aw-shell").join("config").join("colors.json"))
+}
+
+fn load_aw_shell_colors() -> Option<HashMap<String, String>> {
+    let data = fs::read_to_string(aw_shell_colors_path()?).ok()?;
+    let colors: HashMap<String, String> = serde_json::from_str(&data).ok()?;
+    colors.contains_key("primary").then_some(colors)
+}
+
 fn run_matugen(wallpaper_path: &str) -> Option<HashMap<String, String>> {
     // Resolve symlinks so matugen gets a real file path
     let resolved = std::fs::canonicalize(wallpaper_path)
@@ -222,8 +235,8 @@ fn run_matugen(wallpaper_path: &str) -> Option<HashMap<String, String>> {
 /// Returns None if matugen fails (caller should use defaults).
 #[pyfunction]
 fn get_cached_colors(py: Python<'_>, wallpaper_path: &str) -> PyResult<Option<PyObject>> {
-    // Try cache first
-    if let Some(colors) = load_cache(wallpaper_path) {
+    // aw-shell's palette first, then our cache, then a fresh matugen run
+    if let Some(colors) = load_aw_shell_colors().or_else(|| load_cache(wallpaper_path)) {
         let dict = PyDict::new(py);
         for (k, v) in colors {
             dict.set_item(k, v)?;

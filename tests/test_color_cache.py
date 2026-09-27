@@ -1,5 +1,6 @@
 """Color cache must follow the wallpaper symlink's target, not just its mtime."""
 
+import json
 import os
 import shutil
 import struct
@@ -62,6 +63,45 @@ class TestColorCacheKey(unittest.TestCase):
 
         self.assertTrue(red_colors and blue_colors)
         self.assertNotEqual(red_colors["primary"], blue_colors["primary"])
+
+
+class TestAwShellColors(unittest.TestCase):
+    """When aw-shell is installed, its rendered palette wins, so the terminal
+    follows the scheme or custom color picked there."""
+
+    ISOLATED_ENV = TestColorCacheKey.ISOLATED_ENV
+    setUp = TestColorCacheKey.setUp
+    tearDown = TestColorCacheKey.tearDown
+
+    def _write_aw_shell_colors(self, colors: dict) -> None:
+        path = Path(os.environ["XDG_CONFIG_HOME"]) / "aw-shell" / "config" / "colors.json"
+        path.parent.mkdir(parents=True)
+        path.write_text(json.dumps(colors))
+
+    def test_uses_aw_shell_palette_when_present(self):
+        from matuwrap.wrp_native import get_cached_colors
+
+        self._write_aw_shell_colors({"primary": "#123456", "tertiary": "#abcdef"})
+        wall = self.tmp / ".current.wall"
+        _solid_png(self.tmp / "red.png", (200, 30, 30))
+        wall.symlink_to(self.tmp / "red.png")
+
+        colors = get_cached_colors(str(wall))
+        self.assertEqual(colors["primary"], "#123456")
+        self.assertEqual(colors["tertiary"], "#abcdef")
+
+    def test_ignores_invalid_aw_shell_file(self):
+        from matuwrap.wrp_native import get_cached_colors
+
+        path = Path(os.environ["XDG_CONFIG_HOME"]) / "aw-shell" / "config" / "colors.json"
+        path.parent.mkdir(parents=True)
+        path.write_text("{ not json")
+        _solid_png(self.tmp / "red.png", (200, 30, 30))
+        wall = self.tmp / ".current.wall"
+        wall.symlink_to(self.tmp / "red.png")
+
+        colors = get_cached_colors(str(wall))  # falls back to matugen
+        self.assertTrue(colors and colors["primary"].startswith("#"))
 
 
 if __name__ == "__main__":

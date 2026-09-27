@@ -9,11 +9,12 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import time
 import unittest
 from pathlib import Path
 from typing import Callable
-from unittest import skipIf
+from unittest import mock, skipIf
 
 # Check environment conditions
 def _check_hyprland() -> bool:
@@ -75,14 +76,19 @@ class TestColorCachePerformance(unittest.TestCase):
 
         wallpaper = str(WALLPAPER_PATH)
 
-        # Measure cold start (single run - it's slow)
-        invalidate_color_cache()
-        start = time.perf_counter()
-        get_cached_colors(wallpaper)
-        cold_ms = (time.perf_counter() - start) * 1000
+        # Measure the matugen cache itself: hide aw-shell's palette (which
+        # would skip matugen entirely) and keep the user's cache untouched
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.dict(
+            os.environ, {"XDG_CONFIG_HOME": f"{tmp}/config", "XDG_CACHE_HOME": f"{tmp}/cache"}
+        ):
+            # Measure cold start (single run - it's slow)
+            invalidate_color_cache()
+            start = time.perf_counter()
+            get_cached_colors(wallpaper)
+            cold_ms = (time.perf_counter() - start) * 1000
 
-        # Measure cached access
-        cached_ms = benchmark(lambda: get_cached_colors(wallpaper))
+            # Measure cached access
+            cached_ms = benchmark(lambda: get_cached_colors(wallpaper))
 
         speedup = cold_ms / cached_ms
 
