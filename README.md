@@ -59,8 +59,8 @@ wrp hue <on/off> <id>              # Turn on light <id>
 wrp hue color <id> "<HEX>"         # Set color "<HEX>" for light <id>
 wrp hue brightness <id> <percent>  # Set brightness <percent> for light <id>
 wrp hue theme <id>                 # Set color to THEME_PRIMARY for light <id>
-wrp get_color                      # Get primary color from theme
-wrp get_color ps1                  # Get PS1 prompt precomputed with style
+wrp get_colors                     # Get primary color from theme
+wrp get_colors ps1                 # Get PS1 prompt precomputed with style
 wrp hue gui                        # Open graphical user interface
 ```
 
@@ -73,7 +73,7 @@ Native Rust module (`wrp_native`) provides significant speedups:
 | Matugen colors (cached) | 345ms | 0.02ms | ~15,000x |
 | Hyprland IPC | 2.1ms | 0.05ms | ~40x |
 
-- **Color caching**: Matugen results cached to `~/.cache/matuwrap/colors.json` with wallpaper mtime validation
+- **Color caching**: Matugen results cached to `~/.cache/matuwrap/colors.json`, keyed on the wallpaper symlink's resolved target and its mtime; matugen runs with `--dry-run`, so it never re-applies your templates or wallpaper
 - **Hyprland IPC**: Direct Unix socket communication instead of spawning `hyprctl`
 
 ## Adding Commands
