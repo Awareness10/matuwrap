@@ -28,6 +28,7 @@ _MW_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/matuwrap"
 _MW_CACHE_PS1="$_MW_CACHE_DIR/ps1"
 _MW_CACHE_COLOR="$_MW_CACHE_DIR/color"
 _MW_WALL="$HOME/.current.wall"
+_MW_AW_COLORS="${XDG_CONFIG_HOME:-$HOME/.config}/aw-shell/config/colors.json"
 
 # Regenerate shell cache files via wrp (slow, only on wallpaper change)
 _mw_regen_cache() {
@@ -58,7 +59,12 @@ _mw_cache_fresh() {
     local wall_mt cache_mt
     wall_mt=$(stat -c %Y "$_MW_WALL" 2>/dev/null)      || return 1
     cache_mt=$(stat -c %Y "$_MW_CACHE_PS1" 2>/dev/null) || return 1
-    [ "$wall_mt" -le "$cache_mt" ]
+    [ "$wall_mt" -le "$cache_mt" ] || return 1
+    # aw-shell also rewrites its palette on scheme or custom color changes,
+    # which don't touch the wallpaper symlink
+    if [ -f "$_MW_AW_COLORS" ]; then
+        [ "$(stat -c %Y "$_MW_AW_COLORS")" -le "$cache_mt" ] || return 1
+    fi
 }
 
 # On shell startup: use cache if fresh, else regenerate
