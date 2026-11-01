@@ -62,7 +62,34 @@ wrp hue theme <id>                 # Set color to THEME_PRIMARY for light <id>
 wrp get_colors                     # Get primary color from theme
 wrp get_colors ps1                 # Get PS1 prompt precomputed with style
 wrp hue gui                        # Open graphical user interface
+wrp install bash                   # Install bash PS1 + fastfetch integration
 ```
+
+## Shell integration
+
+`wrp install bash` writes `~/.config/matuwrap/scripts/matuwrap` and sources it
+from `~/.bashrc`. It colors the PS1 (git + venv aware) and fastfetch with the
+current palette, and runs `ff` (fastfetch, if installed) on shell startup.
+
+Logos are optional; set them in `~/.bashrc` **before** the `source` line:
+
+```bash
+export MW_FF_LOGO=~/.config/fastfetch/logos/my-logo.txt   # text logo
+export MW_FF_IMAGE=~/Pictures/my-logo.png                 # image logo
+export MW_FF_IMAGE_WIDTH=30 MW_FF_IMAGE_HEIGHT=20         # image size in cells (default 30x20)
+source ~/.config/matuwrap/scripts/matuwrap
+```
+
+```bash
+ff              # run with the saved mode (default: text)
+ff text|image   # run once in that mode
+ff-toggle       # switch the saved mode between text and image
+```
+
+- **Text mode** shows `MW_FF_LOGO`, or fastfetch's built-in Arch logo if it isn't set or doesn't exist.
+- **Image mode** shows `MW_FF_IMAGE` with the kitty graphics protocol (`--logo-type kitty-direct`). It works in kitty, ghostty and WezTerm, but not over SSH. kitty and ghostty only render PNG this way. Anywhere else, or without `MW_FF_IMAGE`, it falls back to text mode.
+- A leading `~/` is expanded even if the value is quoted.
+- The saved mode lives in `${XDG_STATE_HOME:-~/.local/state}/matuwrap/ff-logo`.
 
 ## Performance
 

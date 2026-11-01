@@ -120,14 +120,98 @@ case "$TERM" in
         ;;
 esac
 
-# --- Fastfetch override ---------------------------------------------------
+# --- Fastfetch ------------------------------------------------------------
+#
+# ff               run fastfetch with the saved logo mode (default: text)
+# ff text|image    run once with that mode ("ascii" works as "text")
+# ff-toggle        switch the saved mode between text and image, then run ff
+#
+# Logos are set in ~/.bashrc *before* the line that sources this script,
+# since ff runs once at startup:
+#
+#   export MW_FF_LOGO=~/.config/fastfetch/logos/my-logo.txt   # text mode
+#   export MW_FF_IMAGE=~/Pictures/my-logo.png                 # image mode
+#   export MW_FF_IMAGE_WIDTH=30 MW_FF_IMAGE_HEIGHT=20         # image size (cells)
+#
+# A leading "~/" is expanded, so quoted "~/..." values work too.
+#
+# Image mode uses the kitty graphics protocol (fastfetch kitty-direct), so it
+# only runs in kitty, ghostty and WezTerm, and never over SSH; kitty and
+# ghostty only render PNG this way. Elsewhere, or if MW_FF_IMAGE isn't a file,
+# ff falls back to text mode. Text mode uses MW_FF_LOGO if it's a file, else
+# fastfetch's built-in Arch logo.
+
+_MW_FF_MODE_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/matuwrap/ff-logo"
+
+# Print $1 with a leading "~/" expanded to $HOME
+_mw_expand_home() {
+    case "$1" in
+        "~/"*) printf '%s\n' "$HOME/${1#"~/"}" ;;
+        *)     printf '%s\n' "$1" ;;
+    esac
+}
+
+# True if the terminal can show kitty-direct images
+_mw_ff_image_ok() {
+    [ -z "$SSH_TTY" ] && [ -z "$SSH_CONNECTION" ] || return 1
+    case "$TERM" in
+        xterm-kitty|xterm-ghostty) return 0 ;;
+    esac
+    [ "$TERM_PROGRAM" = WezTerm ]
+}
 
 ff() {
-    fastfetch \
-        --color "$AW_COLOR" \
-        --logo arch \
-        --logo-color-1 "$AW_COLOR" \
-        --logo-color-2 "$AW_COLOR"
+    local mode="" explicit=""
+    case "${1:-}" in
+        "")         [ -f "$_MW_FF_MODE_FILE" ] && mode="$(<"$_MW_FF_MODE_FILE")" ;;
+        text|ascii) mode=text  explicit=1 ;;
+        image)      mode=image explicit=1 ;;
+        *)          echo "usage: ff [text|image]" >&2; return 2 ;;
+    esac
+
+    if [ "$mode" = image ]; then
+        local image
+        image="$(_mw_expand_home "${MW_FF_IMAGE:-}")"
+        if [ -z "$image" ] || [ ! -f "$image" ]; then
+            [ -n "$explicit" ] &&
+                echo "ff: set MW_FF_IMAGE to an image file to use image mode" >&2
+        elif _mw_ff_image_ok; then
+            fastfetch \
+                --color "$AW_COLOR" \
+                --logo "$image" \
+                --logo-type kitty-direct \
+                --logo-width "${MW_FF_IMAGE_WIDTH:-30}" \
+                --logo-height "${MW_FF_IMAGE_HEIGHT:-20}"
+            return
+        fi
+    fi
+
+    # Text mode (also any legacy "ascii" or unknown saved value)
+    local logo
+    logo="$(_mw_expand_home "${MW_FF_LOGO:-}")"
+    if [ -n "$logo" ] && [ -f "$logo" ]; then
+        fastfetch \
+            --color "$AW_COLOR" \
+            --logo "$logo" \
+            --logo-type file \
+            --logo-color-1 "$AW_COLOR" \
+            --logo-padding-top 1
+    else
+        fastfetch \
+            --color "$AW_COLOR" \
+            --logo arch \
+            --logo-color-1 "$AW_COLOR" \
+            --logo-color-2 "$AW_COLOR"
+    fi
+}
+
+ff-toggle() {
+    local new=image
+    [ -f "$_MW_FF_MODE_FILE" ] && [ "$(<"$_MW_FF_MODE_FILE")" = image ] && new=text
+    mkdir -p "${_MW_FF_MODE_FILE%/*}"
+    echo "$new" > "$_MW_FF_MODE_FILE"
+    echo "ff logo: $new"
+    ff "$new"
 }
 
 # Run fastfetch on shell startup (AW_COLOR is set by reload-colors above)
