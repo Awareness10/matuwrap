@@ -18,6 +18,12 @@ uv run maturin build --release
 uv tool install .
 ```
 
+Or straight from GitHub (still needs the Rust toolchain; uv builds the native module via maturin):
+
+```bash
+uv tool install git+https://github.com/Awareness10/matuwrap
+```
+
 For development:
 
 ```bash
