@@ -300,9 +300,15 @@ def _find_insert_point(lines: list[str]) -> int:
 
 
 def _patch_bashrc() -> bool:
-    """Insert source line into .bashrc, replacing the old prompt setup region."""
+    """Insert source line into .bashrc, replacing the old prompt setup region.
+
+    Creates .bashrc if it's missing. Returns False only when it already
+    sources matuwrap in the right place and nothing was changed.
+    """
     if not BASHRC.exists():
-        return False
+        BASHRC.write_text(f"# matuwrap shell integration\n{SOURCE_LINE}\n")
+        print_success(f"Created    {BASHRC}")
+        return True
 
     text = BASHRC.read_text()
     lines = text.splitlines()
@@ -314,8 +320,13 @@ def _patch_bashrc() -> bool:
         if SOURCE_LINE in l:
             source_idx = i
             break
-    ideal_pos = _find_insert_point(lines)
-    already_ok = source_idx is not None and source_idx >= ideal_pos and not has_old
+    already_ok = False
+    if source_idx is not None and not has_old:
+        # Where the line would go if it weren't there. Leave the source line
+        # out, else a .bashrc that ends with it (no PATH exports) never counts
+        # as done: the fallback insert point is one past its own line.
+        others = lines[:source_idx] + lines[source_idx + 1:]
+        already_ok = source_idx >= _find_insert_point(others)
 
     if already_ok:
         return False
