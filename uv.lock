@@ -2,9 +2,6 @@ version = 1
 revision = 5
 requires-python = ">=3.12"
 
-[manifest]
-constraints = [{ name = "certifi", specifier = ">=2026.10.19" }]
-
 [[package]]
 name = "certifi"
 version = "2026.10.23"
@@ -200,6 +197,7 @@ name = "matuwrap"
 version = "0.1.5"
 source = { editable = "." }
 dependencies = [
+    { name = "certifi" },
     { name = "dotenv" },
     { name = "glaze" },
     { name = "pyside6" },
@@ -215,6 +213,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "certifi", specifier = ">=2026.10.19" },
     { name = "dotenv", specifier = ">=0.9.9" },
     { name = "glaze", git = "https://github.com/awareness10/glaze" },
     { name = "pyside6", specifier = ">=6.10.1" },
