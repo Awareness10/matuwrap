@@ -293,3 +293,38 @@ class TestFastfetch(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# The PS1 section (git-prompt and venv helpers aren't needed to build it)
+PROMPT = BASH_INTEGRATION[BASH_INTEGRATION.index("# --- PS1"):BASH_INTEGRATION.index("# --- Fastfetch")]
+WRP_PS1 = r"\[\033[38;2;1;2;3m\]\u"
+
+
+class TestPrompt(unittest.TestCase):
+    """The colored prompt is set in every terminal that shows 24-bit color."""
+
+    def _ps1(self, **env) -> str:
+        result = subprocess.run(
+            # PS1 set in the script: bash drops it from a non-interactive shell's environment
+            ["bash", "--norc", "-c", "PS1=default\n" + PROMPT + '\nprintf "%s" "$PS1"'],
+            env={"PATH": os.environ["PATH"], "WRP_PS1": WRP_PS1, **env},
+            capture_output=True, text=True, check=True,
+        )
+        return result.stdout
+
+    def test_colored_in_color_terminals(self):
+        for env in ({"TERM": "xterm-256color"}, {"TERM": "xterm-kitty"},
+                    {"TERM": "foot"}, {"TERM": "foot-extra"}, {"TERM": "alacritty"},
+                    {"TERM": "xterm-ghostty"}, {"TERM": "unknown", "COLORTERM": "truecolor"}):
+            with self.subTest(**env):
+                self.assertIn(WRP_PS1, self._ps1(**env))
+
+    def test_window_title_in_graphical_terminals(self):
+        for term in ("xterm-256color", "foot", "alacritty"):
+            with self.subTest(term=term):
+                self.assertTrue(self._ps1(TERM=term).startswith(r"\[\e]0;"))
+
+    def test_default_prompt_in_plain_terminals(self):
+        for term in ("linux", "dumb"):
+            with self.subTest(term=term):
+                self.assertEqual(self._ps1(TERM=term), "default")

@@ -99,26 +99,34 @@ __matuwrap_venv() {
 
 # --- PS1 ------------------------------------------------------------------
 
-case "$TERM" in
-    xterm-color|*-256color|xterm-kitty)
-        _MW_RED='\[\033[31m\]'
-        _MW_BOLD='\[\033[1m\]'
-        _MW_NC='\[\033[0m\]'
+# Terminals that show 24-bit color, which the prompt's colors are: by TERM,
+# or COLORTERM for those not listed. The console keeps the default prompt
+_mw_color_term() {
+    case "$TERM" in
+        linux|dumb) return 1 ;;
+        xterm-color|*-256color|*-direct|xterm-kitty|xterm-ghostty|foot|foot-*|alacritty) return 0 ;;
+    esac
+    [ "$COLORTERM" = truecolor ] || [ "$COLORTERM" = 24bit ]
+}
 
-        if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
-            _MW_HOST="${_MW_BOLD}\[\033[38;5;214m\]\u@\h:\w${_MW_NC}"
-        else
-            _MW_HOST="${_MW_BOLD}${WRP_PS1}${_MW_NC}"
-        fi
+if _mw_color_term; then
+    _MW_RED='\[\033[31m\]'
+    _MW_BOLD='\[\033[1m\]'
+    _MW_NC='\[\033[0m\]'
 
-        PS1="\$(__matuwrap_venv)${_MW_HOST}${_MW_RED}\$(__git_ps1 \" (%s)\")${_MW_NC}\n\$ "
+    if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+        _MW_HOST="${_MW_BOLD}\[\033[38;5;214m\]\u@\h:\w${_MW_NC}"
+    else
+        _MW_HOST="${_MW_BOLD}${WRP_PS1}${_MW_NC}"
+    fi
 
-        # Terminal title
-        case "$TERM" in
-            xterm*|rxvt*) PS1="\[\e]0;\u@\h: \w\a\]$PS1" ;;
-        esac
-        ;;
-esac
+    PS1="\$(__matuwrap_venv)${_MW_HOST}${_MW_RED}\$(__git_ps1 \" (%s)\")${_MW_NC}\n\$ "
+
+    # Terminal title
+    case "$TERM" in
+        xterm*|rxvt*|foot*|alacritty) PS1="\[\e]0;\u@\h: \w\a\]$PS1" ;;
+    esac
+fi
 
 # --- Fastfetch ------------------------------------------------------------
 #
